@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Library Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #241d14;
+    --bg: #f6f1e6;
+    --bg-2: #ece3cf;
+    --green: #2f4a3c;
+    --green-deep: #21362b;
+    --gold: #b5892f;
+    --card: #fffdf8;
+    --line: rgba(36, 29, 20, 0.15);
+    --red: #a83e2c;
+  }
+  :root[data-theme="dark"] {
+    --ink: #f2ead9;
+    --bg: #171310;
+    --bg-2: #201a14;
+    --green: #6f9c85;
+    --green-deep: #8bb89f;
+    --gold: #d3a34e;
+    --card: #201a14;
+    --line: rgba(242, 234, 217, 0.15);
+    --red: #d3705a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #f2ead9;
+      --bg: #171310;
+      --bg-2: #201a14;
+      --green: #6f9c85;
+      --green-deep: #8bb89f;
+      --gold: #d3a34e;
+      --card: #201a14;
+      --line: rgba(242, 234, 217, 0.15);
+      --red: #d3705a;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; margin: 0; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  button, input, select { font-family: inherit; }
+
+  header {
+    border-bottom: 2px solid var(--green-deep);
+    background: var(--bg);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; }
+  .brand { display: flex; align-items: center; gap: 12px; font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.3rem; }
+  .brand svg { width: 34px; height: 34px; }
+  .brand .tag { display: block; font-family: 'Inter'; font-size: 0.75rem; font-weight: 500; opacity: 0.6; margin-top: 2px; }
+  .stat-pill { display: flex; gap: 22px; font-size: 0.86rem; }
+  .stat-pill div span { display: block; font-family: 'Fraunda', 'Fraunces', serif; font-weight: 700; font-size: 1.25rem; color: var(--green-deep); }
+  :root[data-theme="dark"] .stat-pill div span, :root:not([data-theme="light"]) .stat-pill div span { color: var(--green-deep); }
+  @media (max-width: 620px) { .stat-pill { display: none; } }
+
+  main { padding: 32px 0 60px; }
+
+  .toolbar {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 22px;
+  }
+  .search-input {
+    flex: 1; min-width: 200px; padding: 11px 16px; border: 1px solid var(--line); border-radius: 6px;
+    background: var(--card); color: var(--ink); font-size: 0.92rem;
+  }
+  .filter-select {
+    padding: 11px 14px; border: 1px solid var(--line); border-radius: 6px;
+    background: var(--card); color: var(--ink); font-size: 0.9rem;
+  }
+  .add-btn {
+    background: var(--green-deep); color: #fff; border: none; border-radius: 6px;
+    padding: 11px 20px; font-weight: 600; font-size: 0.9rem; cursor: pointer; white-space: nowrap;
+  }
+  .add-btn:hover { opacity: 0.92; }
+
+  .table-wrap {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  thead th {
+    text-align: left; padding: 14px 16px; background: var(--bg-2); font-weight: 600;
+    font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; opacity: 0.7;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td { padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--bg-2); }
+  .book-title { font-weight: 600; }
+  .book-title .isbn { display: block; font-size: 0.76rem; opacity: 0.55; font-weight: 400; margin-top: 2px; }
+  .status-pill {
+    font-size: 0.76rem; padding: 4px 11px; border-radius: 20px; border: 1px solid var(--line); white-space: nowrap;
+  }
+  .status-available { color: var(--green-deep); border-color: var(--green-deep); }
+  .status-borrowed { color: var(--red); border-color: var(--red); }
+  .row-actions { display: flex; gap: 8px; }
+  .icon-btn {
+    background: none; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px;
+    cursor: pointer; font-size: 0.8rem; color: var(--ink);
+  }
+  .icon-btn:hover { background: var(--bg-2); }
+  .icon-btn.danger:hover { background: var(--red); color: #fff; border-color: var(--red); }
+
+  .empty-state { text-align: center; padding: 60px 20px; opacity: 0.6; }
+
+  /* modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg); border-radius: 10px; max-width: 460px; width: 100%;
+    padding: 26px; max-height: 88vh; overflow-y: auto;
+  }
+  .modal h2 { font-size: 1.25rem; margin-bottom: 18px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 0.82rem; opacity: 0.7; margin-bottom: 6px; }
+  .field input, .field select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px;
+    background: var(--card); color: var(--ink); font-size: 0.9rem;
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .error-text { color: var(--red); font-size: 0.78rem; margin-top: 4px; display: none; }
+  .field.has-error input { border-color: var(--red); }
+  .field.has-error .error-text { display: block; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+  .save-btn {
+    flex: 1; background: var(--green-deep); color: #fff; border: none; border-radius: 6px;
+    padding: 12px; font-weight: 600; cursor: pointer; font-size: 0.92rem;
+  }
+  .cancel-btn {
+    flex: 1; background: none; border: 1px solid var(--line); color: var(--ink); border-radius: 6px;
+    padding: 12px; font-weight: 600; cursor: pointer; font-size: 0.92rem;
+  }
+
+  .confirm-modal .modal { max-width: 380px; text-align: center; }
+  .confirm-modal .icon { font-size: 2.2rem; margin-bottom: 8px; }
+  .confirm-actions { display: flex; gap: 10px; margin-top: 18px; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--green-deep); color: #fff; padding: 12px 22px; border-radius: 8px;
+    font-size: 0.88rem; font-weight: 500; z-index: 50; opacity: 0; pointer-events: none;
+    transition: all 0.25s ease;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  footer { border-top: 1px solid var(--line); padding: 22px 0 40px; font-size: 0.85rem; opacity: 0.6; text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand">
+      <svg viewBox="0 0 100 100"><rect x="15" y="20" width="70" height="60" rx="4" fill="none" stroke="var(--green-deep)" stroke-width="4"/><line x1="50" y1="20" x2="50" y2="80" stroke="var(--gold)" stroke-width="4"/><line x1="25" y1="35" x2="42" y2="35" stroke="var(--green-deep)" stroke-width="3"/><line x1="25" y1="48" x2="42" y2="48" stroke="var(--green-deep)" stroke-width="3"/><line x1="58" y1="35" x2="75" y2="35" stroke="var(--green-deep)" stroke-width="3"/><line x1="58" y1="48" x2="75" y2="48" stroke="var(--green-deep)" stroke-width="3"/></svg>
+      <div>Library Management System<span class="tag">Catalog &amp; Circulation</span></div>
+    </div>
+    <div class="stat-pill">
+      <div>Total<span id="statTotal">0</span></div>
+      <div>Available<span id="statAvail">0</span></div>
+      <div>Borrowed<span id="statBorrowed">0</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="toolbar">
+    <input class="search-input" id="searchInput" placeholder="Search by title, author, or ISBN..." />
+    <select class="filter-select" id="genreFilter"><option value="">All genres</option></select>
+    <select class="filter-select" id="statusFilter">
+      <option value="">All status</option>
+      <option value="Available">Available</option>
+      <option value="Borrowed">Borrowed</option>
+    </select>
+    <button class="add-btn" id="addBtn">+ Add Book</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Genre</th>
+          <th>Year</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="empty-state" id="emptyState" style="display:none;">No books match your search or filters.</div>
+  </div>
+</main>
+
+<footer class="wrap">
+  Library Management System — demo CRUD application. Data is stored locally in your browser only.
+</footer>
+
+<!-- Add/Edit modal -->
+<div class="modal-overlay" id="formOverlay">
+  <div class="modal">
+    <h2 id="formTitle">Add Book</h2>
+    <form id="bookForm">
+      <div class="field" id="f-title">
+        <label>Title</label>
+        <input id="inpTitle" placeholder="e.g. The Silent Patient" />
+        <div class="error-text">Title is required.</div>
+      </div>
+      <div class="field" id="f-author">
+        <label>Author</label>
+        <input id="inpAuthor" placeholder="e.g. Alex Michaelides" />
+        <div class="error-text">Author is required.</div>
+      </div>
+      <div class="row2">
+        <div class="field" id="f-genre">
+          <label>Genre</label>
+          <input id="inpGenre" placeholder="e.g. Thriller" />
+          <div class="error-text">Genre is required.</div>
+        </div>
+        <div class="field" id="f-year">
+          <label>Published year</label>
+          <input id="inpYear" placeholder="e.g. 2019" />
+          <div class="error-text">Enter a valid year.</div>
+        </div>
+      </div>
+      <div class="field" id="f-isbn">
+        <label>ISBN</label>
+        <input id="inpIsbn" placeholder="e.g. 978-1250301697" />
+        <div class="error-text">Enter a valid, unique ISBN.</div>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="inpStatus">
+          <option value="Available">Available</option>
+          <option value="Borrowed">Borrowed</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" id="cancelBtn">Cancel</button>
+        <button type="submit" class="save-btn" id="saveBtn">Save Book</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete confirm modal -->
+<div class="modal-overlay confirm-modal" id="confirmOverlay">
+  <div class="modal">
+    <div class="icon">🗑️</div>
+    <h2>Delete this book?</h2>
+    <p style="opacity:0.7;font-size:0.9rem;margin-top:6px;" id="confirmText"></p>
+    <div class="confirm-actions">
+      <button class="cancel-btn" id="confirmCancel">Cancel</button>
+      <button class="save-btn" id="confirmDelete" style="background:var(--red);">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'library_books_v1';
+  let books = [];
+  let editingId = null;
+  let deletingId = null;
+
+  const seed = [
+    { id: 1, title: 'The Silent Patient', author: 'Alex Michaelides', genre: 'Thriller', year: 2019, isbn: '978-1250301697', status: 'Available' },
+    { id: 2, title: 'Atomic Habits', author: 'James Clear', genre: 'Self-help', year: 2018, isbn: '978-0735211292', status: 'Borrowed' },
+    { id: 3, title: 'Sapiens', author: 'Yuval Noah Harari', genre: 'History', year: 2011, isbn: '978-0062316097', status: 'Available' },
+    { id: 4, title: 'The Midnight Library', author: 'Matt Haig', genre: 'Fiction', year: 2020, isbn: '978-0525559474', status: 'Available' },
+    { id: 5, title: 'Educated', author: 'Tara Westover', genre: 'Memoir', year: 2018, isbn: '978-0399590504', status: 'Borrowed' },
+  ];
+
+  function loadBooks() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      books = saved ? JSON.parse(saved) : seed.slice();
+    } catch (e) { books = seed.slice(); }
+  }
+  function saveBooks() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(books)); } catch (e) { /* ignore */ }
+  }
+
+  function nextId() {
+    return books.length ? Math.max(...books.map(b => b.id)) + 1 : 1;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function populateGenreFilter() {
+    const sel = document.getElementById('genreFilter');
+    const current = sel.value;
+    const genres = [...new Set(books.map(b => b.genre))].sort();
+    sel.innerHTML = '<option value="">All genres</option>' + genres.map(g => `<option value="${g}">${g}</option>`).join('');
+    sel.value = current;
+  }
+
+  function getFiltered() {
+    const term = document.getElementById('searchInput').value.trim().toLowerCase();
+    const genre = document.getElementById('genreFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    return books.filter(b => {
+      const matchesTerm = !term || b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term) || b.isbn.toLowerCase().includes(term);
+      const matchesGenre = !genre || b.genre === genre;
+      const matchesStatus = !status || b.status === status;
+      return matchesTerm && matchesGenre && matchesStatus;
+    });
+  }
+
+  function renderStats() {
+    document.getElementById('statTotal').textContent = books.length;
+    document.getElementById('statAvail').textContent = books.filter(b => b.status === 'Available').length;
+    document.getElementById('statBorrowed').textContent = books.filter(b => b.status === 'Borrowed').length;
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('tableBody');
+    const empty = document.getElementById('emptyState');
+    const list = getFiltered();
+
+    if (list.length === 0) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      tbody.innerHTML = list.map(b => `
+        <tr>
+          <td class="book-title">${escapeHtml(b.title)}<span class="isbn">ISBN: ${escapeHtml(b.isbn)}</span></td>
+          <td>${escapeHtml(b.author)}</td>
+          <td>${escapeHtml(b.genre)}</td>
+          <td>${b.year}</td>
+          <td><span class="status-pill ${b.status === 'Available' ? 'status-available' : 'status-borrowed'}">${b.status}</span></td>
+          <td>
+            <div class="row-actions">
+              <button class="icon-btn" data-edit="${b.id}">Edit</button>
+              <button class="icon-btn danger" data-delete="${b.id}">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    tbody.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => openEdit(Number(btn.dataset.edit))));
+    tbody.querySelectorAll('[data-delete]').forEach(btn => btn.addEventListener('click', () => openDeleteConfirm(Number(btn.dataset.delete))));
+    renderStats();
+    populateGenreFilter();
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---- form modal ----
+  const formOverlay = document.getElementById('formOverlay');
+  const bookForm = document.getElementById('bookForm');
+
+  function clearErrors() {
+    document.querySelectorAll('.field').forEach(f => f.classList.remove('has-error'));
+  }
+
+  function openAdd() {
+    editingId = null;
+    document.getElementById('formTitle').textContent = 'Add Book';
+    bookForm.reset();
+    document.getElementById('inpStatus').value = 'Available';
+    clearErrors();
+    formOverlay.classList.add('open');
+  }
+
+  function openEdit(id) {
+    const b = books.find(x => x.id === id);
+    if (!b) return;
+    editingId = id;
+    document.getElementById('formTitle').textContent = 'Edit Book';
+    document.getElementById('inpTitle').value = b.title;
+    document.getElementById('inpAuthor').value = b.author;
+    document.getElementById('inpGenre').value = b.genre;
+    document.getElementById('inpYear').value = b.year;
+    document.getElementById('inpIsbn').value = b.isbn;
+    document.getElementById('inpStatus').value = b.status;
+    clearErrors();
+    formOverlay.classList.add('open');
+  }
+
+  function closeForm() { formOverlay.classList.remove('open'); }
+
+  document.getElementById('addBtn').addEventListener('click', openAdd);
+  document.getElementById('cancelBtn').addEventListener('click', closeForm);
+  formOverlay.addEventListener('click', (e) => { if (e.target === formOverlay) closeForm(); });
+
+  bookForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearErrors();
+
+    const title = document.getElementById('inpTitle').value.trim();
+    const author = document.getElementById('inpAuthor').value.trim();
+    const genre = document.getElementById('inpGenre').value.trim();
+    const yearRaw = document.getElementById('inpYear').value.trim();
+    const isbn = document.getElementById('inpIsbn').value.trim();
+    const status = document.getElementById('inpStatus').value;
+
+    let hasError = false;
+    const yearNum = Number(yearRaw);
+    const currentYear = new Date().getFullYear();
+
+    if (!title) { markError('f-title'); hasError = true; }
+    if (!author) { markError('f-author'); hasError = true; }
+    if (!genre) { markError('f-genre'); hasError = true; }
+    if (!yearRaw || isNaN(yearNum) || yearNum < 1450 || yearNum > currentYear) { markError('f-year'); hasError = true; }
+
+    const isbnClean = isbn.replace(/[-\s]/g, '');
+    const isbnValid = /^[0-9]{10}([0-9]{3})?$/.test(isbnClean);
+    const isDuplicate = books.some(b => b.isbn.replace(/[-\s]/g, '') === isbnClean && b.id !== editingId);
+    if (!isbn || !isbnValid || isDuplicate) { markError('f-isbn'); hasError = true; }
+
+    if (hasError) return;
+
+    if (editingId) {
+      const b = books.find(x => x.id === editingId);
+      Object.assign(b, { title, author, genre, year: yearNum, isbn, status });
+      showToast('Book updated successfully.');
+    } else {
+      books.push({ id: nextId(), title, author, genre, year: yearNum, isbn, status });
+      showToast('Book added successfully.');
+    }
+
+    saveBooks();
+    renderTable();
+    closeForm();
+  });
+
+  function markError(fieldId) {
+    document.getElementById(fieldId).classList.add('has-error');
+  }
+
+  // ---- delete confirm ----
+  const confirmOverlay = document.getElementById('confirmOverlay');
+
+  function openDeleteConfirm(id) {
+    const b = books.find(x => x.id === id);
+    if (!b) return;
+    deletingId = id;
+    document.getElementById('confirmText').textContent = `"${b.title}" by ${b.author} will be permanently removed.`;
+    confirmOverlay.classList.add('open');
+  }
+  function closeConfirm() { confirmOverlay.classList.remove('open'); deletingId = null; }
+
+  document.getElementById('confirmCancel').addEventListener('click', closeConfirm);
+  confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirm(); });
+  document.getElementById('confirmDelete').addEventListener('click', () => {
+    if (deletingId == null) return;
+    books = books.filter(b => b.id !== deletingId);
+    saveBooks();
+    renderTable();
+    showToast('Book deleted.');
+    closeConfirm();
+  });
+
+  // ---- search & filters ----
+  document.getElementById('searchInput').addEventListener('input', renderTable);
+  document.getElementById('genreFilter').addEventListener('change', renderTable);
+  document.getElementById('statusFilter').addEventListener('change', renderTable);
+
+  // init
+  loadBooks();
+  renderTable();
+})();
+</script>
+
+</body>
+</html>
